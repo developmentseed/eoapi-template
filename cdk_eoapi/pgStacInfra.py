@@ -53,7 +53,7 @@ class pgStacInfraStack(Stack):
         stac_api_lambda = PgStacApiLambda(
             self,
             "pgstac-api",
-            api_env=dict(NAME=stac_api_lambda_name, description=f"{stage} STAC API"),
+            api_env={"NAME": stac_api_lambda_name, "description": f"{stage} STAC API"},
             vpc=vpc,
             db=pgstac_db.db,
             db_secret=pgstac_db.pgstac_secret,
@@ -67,10 +67,10 @@ class pgStacInfraStack(Stack):
         TitilerPgstacApiLambda(
             self,
             "titiler-pgstac-api",
-            api_env=dict(
-                NAME=titiler_pgstac_api_lambda_name,
-                description=f"{stage} titiler pgstac API",
-            ),
+            api_env={
+                "NAME": titiler_pgstac_api_lambda_name,
+                "description": f"{stage} titiler pgstac API",
+            },
             vpc=vpc,
             db=pgstac_db.db,
             db_secret=pgstac_db.pgstac_secret,
