@@ -1,8 +1,8 @@
-import os
-from config import Config
-from cdk_eoapi import pgStacInfra, vpc
-from aws_cdk import App
 import yaml
+from aws_cdk import App
+
+from cdk_eoapi import pgStacInfra, vpc
+from config import Config
 
 app = App()
 

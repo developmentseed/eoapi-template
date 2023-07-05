@@ -1,5 +1,6 @@
+from typing import Any, Dict, List, Optional, Union
+
 import pydantic
-from typing import Optional, List, Dict, Union, Any
 from aws_cdk import aws_ec2
 
 
@@ -11,7 +12,9 @@ class Config(pydantic.BaseSettings):
         description="Stage of deployment", default="test"
     )
     auth_provider_jwks_url: Optional[str] = pydantic.Field(
-        description="Auth Provider JSON Web Key Set URL for ingestion authentication. If not provided, no authentication will be required."
+        description="""Auth Provider JSON Web Key Set URL for
+        ingestion authentication. If not provided, 
+        no authentication will be required."""
     )
     data_access_role_arn: Optional[str] = pydantic.Field(
         description="Role ARN for data access, if none will be created at runtime.",
@@ -33,7 +36,8 @@ class Config(pydantic.BaseSettings):
         default=False,
     )
     bastion_host_allow_ip_list: Optional[List[str]] = pydantic.Field(
-        description="YAML file containing list of IP addresses to allow SSH access to the bastion host",
+        description="""YAML file containing list of IP addresses to 
+        allow SSH access to the bastion host""",
         default=[],
     )
     bastion_host_user_data: Optional[
@@ -43,7 +47,8 @@ class Config(pydantic.BaseSettings):
         default=aws_ec2.UserData.for_linux(),
     )
     titiler_buckets: Optional[List[str]] = pydantic.Field(
-        description="Path to YAML file containing list of buckets to grant access to the titiler API",
+        description="""Path to YAML file containing list of
+        buckets to grant access to the titiler API""",
         default=[],
     )
 

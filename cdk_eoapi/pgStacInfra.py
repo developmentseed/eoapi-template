@@ -1,10 +1,7 @@
-from aws_cdk import (
-    Stack,
-    aws_iam,
-    aws_ec2,
-    aws_rds,
-)
-from constructs import Construct
+from typing import Optional, Union
+
+import boto3
+from aws_cdk import Stack, aws_ec2, aws_iam, aws_rds
 from cdk_pgstac import (
     BastionHost,
     PgStacApiLambda,
@@ -12,8 +9,7 @@ from cdk_pgstac import (
     StacIngestor,
     TitilerPgstacApiLambda,
 )
-from typing import Union, Optional
-import boto3
+from constructs import Construct
 
 
 class pgStacInfraStack(Stack):
@@ -68,7 +64,7 @@ class pgStacInfraStack(Stack):
             ),
         )
 
-        titiler_pgstac_api_lambda = TitilerPgstacApiLambda(
+        TitilerPgstacApiLambda(
             self,
             "titiler-pgstac-api",
             api_env=dict(
@@ -86,7 +82,7 @@ class pgStacInfraStack(Stack):
             buckets=titiler_buckets,
         )
 
-        bastion_host = BastionHost(
+        BastionHost(
             self,
             "bastion-host",
             vpc=vpc,
@@ -99,6 +95,9 @@ class pgStacInfraStack(Stack):
         )
 
         if data_access_role_arn:
+            # importing provided role from arn.
+            # the stac ingestor will try to assume it when called,
+            # so it must be listed in the data access role trust policy.
             data_access_role = aws_iam.Role.from_role_arn(
                 self,
                 "data-access-role",
@@ -106,9 +105,6 @@ class pgStacInfraStack(Stack):
             )
         else:
             data_access_role = self._create_data_access_role()
-            data_access_role = self._grant_assume_role_with_principal_pattern(
-                data_access_role, f"*{self.stack_name}*ingestor*"
-            )  # beware, there is a limit in the number of characters a role can have (64) and AWS automatically truncates the role ARN if it's too long.
 
         stac_ingestor_env = {"REQUESTER_PAYS": "True"}
 
@@ -130,24 +126,48 @@ class pgStacInfraStack(Stack):
             api_env=stac_ingestor_env,
         )
 
+        # we can only do that if the role is created here.
+        # If injecting a role, that role's trust relationship
+        # must be already set up, or set up after this deployment.
+        if not data_access_role_arn:
+            data_access_role = self._grant_assume_role_with_principal_pattern(
+                data_access_role, stac_ingestor.handler_role.role_name
+            )
+
     def _create_data_access_role(self) -> aws_iam.Role:
+
         """
-        Creates basic data access role
+        Creates an IAM role with full S3 read access.
         """
 
-        return aws_iam.Role(
+        data_access_role = aws_iam.Role(
             self,
             "data-access-role",
             assumed_by=aws_iam.ServicePrincipal("lambda.amazonaws.com"),
         )
 
+        data_access_role.add_to_policy(
+            aws_iam.PolicyStatement(
+                actions=[
+                    "s3:Get*",
+                ],
+                resources=["*"],
+                effect=aws_iam.Effect.ALLOW,
+            )
+        )
+        return data_access_role
+
     def _grant_assume_role_with_principal_pattern(
-        self, role_to_assume: aws_iam.Role, principal_pattern: str
+        self,
+        role_to_assume: aws_iam.Role,
+        principal_pattern: str,
+        account_id: str = boto3.client("sts").get_caller_identity().get("Account"),
     ) -> aws_iam.Role:
         """
-        Grants assume role permissions to the role with the given pattern in the current account
+        Grants assume role permissions to the role of the given
+        account with the given name pattern. Default account
+        is the current account.
         """
-        account_id = boto3.client("sts").get_caller_identity().get("Account")
 
         role_to_assume.assume_role_policy.add_statements(
             aws_iam.PolicyStatement(
