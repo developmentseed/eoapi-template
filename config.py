@@ -3,13 +3,22 @@ from typing import Any, Dict, List, Optional, Union
 import pydantic
 from aws_cdk import aws_ec2
 
+DEFAULT_PROJECT_ID = "cdk-eoapi-demo"
+DEFAULT_STAGE = "test"
+
 
 class Config(pydantic.BaseSettings):
     project_id: Optional[str] = pydantic.Field(
-        description="Project ID", default="cdk-eoapi-demo"
+        description="Project ID", default=DEFAULT_PROJECT_ID
     )
     stage: Optional[str] = pydantic.Field(
-        description="Stage of deployment", default="test"
+        description="Stage of deployment", default=DEFAULT_STAGE
+    )
+    tags: Optional[Dict[str, str]] = pydantic.Field(
+        description="""Tags to apply to resources. If none provided, 
+        will default to the defaults defined in `default_tags`.
+        Note that if tags are passed to the CDK CLI via `--tags`, 
+        they will override any tags defined here."""
     )
     auth_provider_jwks_url: Optional[str] = pydantic.Field(
         description="""Auth Provider JSON Web Key Set URL for
@@ -17,7 +26,8 @@ class Config(pydantic.BaseSettings):
         no authentication will be required."""
     )
     data_access_role_arn: Optional[str] = pydantic.Field(
-        description="Role ARN for data access, if none will be created at runtime.",
+        description="""Role ARN for data access, if none will be
+        created at runtime.""",
     )
     db_instance_type: Optional[str] = pydantic.Field(
         description="Database instance type", default="t3.micro"
@@ -51,6 +61,15 @@ class Config(pydantic.BaseSettings):
         buckets to grant access to the titiler API""",
         default=[],
     )
+
+    @pydantic.validator("tags", pre=True, always=True)
+    def default_tags(cls, v, values):
+        """if no tags provided, we default to tagging with the project
+        ID and stage"""
+        return v or {
+            "project_id": values.get("project_id", DEFAULT_PROJECT_ID),
+            "stage": values.get("stage", DEFAULT_STAGE),
+        }
 
     def build_service_name(self, service_id: str) -> str:
         return f"{self.project_id}-{self.stage}-{service_id}"

@@ -18,6 +18,7 @@ except FileNotFoundError:
     config = Config()
 
 vpc_stack = vpc.VpcStack(
+    tags=config.tags,
     scope=app,
     id=config.build_service_name("pgSTAC-vpc"),
     nat_gateway_count=config.nat_gateway_count,
@@ -26,6 +27,7 @@ vpc_stack = vpc.VpcStack(
 
 pgstac_infra_stack = pgStacInfra.pgStacInfraStack(
     scope=app,
+    tags=config.tags,
     id=config.build_service_name("pgSTAC-infra"),
     vpc=vpc_stack.vpc,
     stac_api_lambda_name=config.build_service_name("STAC API"),
