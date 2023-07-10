@@ -26,8 +26,14 @@ class Config(pydantic.BaseSettings):
         no authentication will be required."""
     )
     data_access_role_arn: Optional[str] = pydantic.Field(
-        description="""Role ARN for data access, if none will be
-        created at runtime.""",
+        description="""Role ARN for data access, that will be
+        used by the STAC ingestor for validation of assets
+        located in S3 and for the tiler application to access
+        assets located in S3. If none, the role will be
+        created at runtime with full S3 read access. If
+        provided, the existing role must be configured to
+        allow the tiler and STAC ingestor lambda roles to
+        assume it.""",
     )
     db_instance_type: Optional[str] = pydantic.Field(
         description="Database instance type", default="t3.micro"
