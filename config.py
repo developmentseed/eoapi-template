@@ -36,7 +36,7 @@ class Config(pydantic.BaseSettings):
         description="Allocated storage for the database", default=5
     )
     public_db_subnet: Optional[bool] = pydantic.Field(
-        description="Whether to put the database in a public", default=False
+        description="Whether to put the database in a public subnet", default=False
     )
     nat_gateway_count: Optional[int] = pydantic.Field(
         description="Number of NAT gateways to create", default=1
