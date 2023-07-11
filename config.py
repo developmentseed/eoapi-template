@@ -2,12 +2,15 @@ from typing import Any, Dict, List, Optional, Union
 
 import pydantic
 from aws_cdk import aws_ec2
+from pydantic_core.core_schema import FieldValidationInfo
+from pydantic_settings import BaseSettings
 
 DEFAULT_PROJECT_ID = "cdk-eoapi-demo"
 DEFAULT_STAGE = "test"
+DEFAULT_NAT_GATEWAY_COUNT = 1
 
 
-class Config(pydantic.BaseSettings):
+class Config(BaseSettings):
     project_id: Optional[str] = pydantic.Field(
         description="Project ID", default=DEFAULT_PROJECT_ID
     )
@@ -18,12 +21,14 @@ class Config(pydantic.BaseSettings):
         description="""Tags to apply to resources. If none provided, 
         will default to the defaults defined in `default_tags`.
         Note that if tags are passed to the CDK CLI via `--tags`, 
-        they will override any tags defined here."""
+        they will override any tags defined here.""",
+        default=None,
     )
     auth_provider_jwks_url: Optional[str] = pydantic.Field(
         description="""Auth Provider JSON Web Key Set URL for
         ingestion authentication. If not provided, 
-        no authentication will be required."""
+        no authentication will be required.""",
+        default=None,
     )
     data_access_role_arn: Optional[str] = pydantic.Field(
         description="""Role ARN for data access, that will be
@@ -34,6 +39,7 @@ class Config(pydantic.BaseSettings):
         provided, the existing role must be configured to
         allow the tiler and STAC ingestor lambda roles to
         assume it.""",
+        default=None,
     )
     db_instance_type: Optional[str] = pydantic.Field(
         description="Database instance type", default="t3.micro"
@@ -45,7 +51,8 @@ class Config(pydantic.BaseSettings):
         description="Whether to put the database in a public subnet", default=False
     )
     nat_gateway_count: Optional[int] = pydantic.Field(
-        description="Number of NAT gateways to create", default=1
+        description="Number of NAT gateways to create",
+        default=DEFAULT_NAT_GATEWAY_COUNT,
     )
     bastion_host_create_elastic_ip: Optional[bool] = pydantic.Field(
         description="Whether to create an elastic IP for the bastion host",
@@ -68,14 +75,21 @@ class Config(pydantic.BaseSettings):
         default=[],
     )
 
-    @pydantic.validator("tags", pre=True, always=True)
-    def default_tags(cls, v, values):
-        """if no tags provided, we default to tagging with the project
-        ID and stage"""
-        return v or {
-            "project_id": values.get("project_id", DEFAULT_PROJECT_ID),
-            "stage": values.get("stage", DEFAULT_STAGE),
-        }
+    @pydantic.field_validator("tags")
+    def default_tags(cls, v, info: FieldValidationInfo):
+        return v or {"project_id": info.data["project_id"], "stage": info.data["stage"]}
+
+    @pydantic.field_validator("nat_gateway_count")
+    def validate_nat_gateway_count(cls, v, info: FieldValidationInfo):
+        if not info.data["public_db_subnet"] and v <= 0:
+            raise ValueError(
+                """if the database and its associated services instances
+                             are to be located in the private subnet of the VPC, NAT
+                             gateways are needed to allow egress from the services
+                             and therefore `nat_gateway_count` has to be > 0."""
+            )
+        else:
+            return v
 
     def build_service_name(self, service_id: str) -> str:
         return f"{self.project_id}-{self.stage}-{service_id}"
