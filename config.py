@@ -38,7 +38,7 @@ class Config(BaseSettings):
         created at runtime with full S3 read access. If
         provided, the existing role must be configured to
         allow the tiler and STAC ingestor lambda roles to
-        assume it.""",
+        assume it. See https://github.com/developmentseed/cdk-pgstac""",
         default=None,
     )
     db_instance_type: Optional[str] = pydantic.Field(
