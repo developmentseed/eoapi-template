@@ -5,7 +5,7 @@ from aws_cdk import aws_ec2
 from pydantic_core.core_schema import FieldValidationInfo
 from pydantic_settings import BaseSettings
 
-DEFAULT_PROJECT_ID = "cdk-eoapi-demo"
+DEFAULT_PROJECT_ID = "eoapi-template-demo"
 DEFAULT_STAGE = "test"
 DEFAULT_NAT_GATEWAY_COUNT = 1
 
@@ -38,7 +38,7 @@ class Config(BaseSettings):
         created at runtime with full S3 read access. If
         provided, the existing role must be configured to
         allow the tiler and STAC ingestor lambda roles to
-        assume it. See https://github.com/developmentseed/cdk-pgstac""",
+        assume it. See https://github.com/developmentseed/eoapi-cdk""",
         default=None,
     )
     db_instance_type: Optional[str] = pydantic.Field(
