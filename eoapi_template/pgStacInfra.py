@@ -2,14 +2,14 @@ from typing import Optional, Union
 
 import boto3
 from aws_cdk import Stack, aws_ec2, aws_iam, aws_rds
-from cdk_pgstac import (
+from constructs import Construct
+from eoapi_cdk import (
     BastionHost,
     PgStacApiLambda,
     PgStacDatabase,
     StacIngestor,
     TitilerPgstacApiLambda,
 )
-from constructs import Construct
 
 
 class pgStacInfraStack(Stack):
