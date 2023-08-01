@@ -135,7 +135,6 @@ class pgStacInfraStack(Stack):
             )
 
     def _create_data_access_role(self) -> aws_iam.Role:
-
         """
         Creates an IAM role with full S3 read access.
         """
