@@ -32,6 +32,7 @@ pgstac_infra_stack = pgStacInfra.pgStacInfraStack(
     vpc=vpc_stack.vpc,
     stac_api_lambda_name=config.build_service_name("STAC API"),
     titiler_pgstac_api_lambda_name=config.build_service_name("titiler pgSTAC API"),
+    tipg_api_lambda_name=config.build_service_name("tipg API"),
     stage=config.stage,
     db_allocated_storage=config.db_allocated_storage,
     public_db_subnet=config.public_db_subnet,

@@ -9,6 +9,7 @@ from eoapi_cdk import (
     PgStacDatabase,
     StacIngestor,
     TitilerPgstacApiLambda,
+    TiPgApiLambda
 )
 
 
@@ -24,6 +25,7 @@ class pgStacInfraStack(Stack):
         db_instance_type: str,
         stac_api_lambda_name: str,
         titiler_pgstac_api_lambda_name: str,
+        tipg_api_lambda_name: str,
         bastion_host_allow_ip_list: list,
         bastion_host_create_elastic_ip: bool,
         titiler_buckets: list,
@@ -80,6 +82,23 @@ class pgStacInfraStack(Stack):
                 else aws_ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             buckets=titiler_buckets,
+        )
+        
+        TiPgApiLambda(
+            self,
+            "tipg-api",
+            api_env={
+                "NAME": tipg_api_lambda_name,
+                "description": f"{stage} tipg API"
+            },
+            vpc=vpc,
+            db=pgstac_db.db,
+            db_secret=pgstac_db.pgstac_secret,
+            subnet_selection=aws_ec2.SubnetSelection(
+                subnet_type=aws_ec2.SubnetType.PUBLIC
+                if public_db_subnet
+                else aws_ec2.SubnetType.PRIVATE_WITH_EGRESS
+            )
         )
 
         BastionHost(

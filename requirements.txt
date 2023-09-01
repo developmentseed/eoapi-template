@@ -1,6 +1,6 @@
 aws-cdk-lib>=2.75.0
 aws_cdk.aws_cognito_identitypool_alpha>=2.75.0a0
-eoapi-cdk==5.0.0
+eoapi-cdk==5.2.0
 constructs>=10.0.0,<11.0.0
 pydantic==2.0.2
 pydantic-settings==2.0.1
