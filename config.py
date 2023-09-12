@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Union
 
 import pydantic
+import yaml
 from aws_cdk import aws_ec2
 from pydantic_core.core_schema import FieldValidationInfo
 from pydantic_settings import BaseSettings
@@ -10,7 +11,7 @@ DEFAULT_STAGE = "test"
 DEFAULT_NAT_GATEWAY_COUNT = 1
 
 
-class Config(BaseSettings):
+class AppConfig(BaseSettings):
     project_id: Optional[str] = pydantic.Field(
         description="Project ID", default=DEFAULT_PROJECT_ID
     )
@@ -54,6 +55,12 @@ class Config(BaseSettings):
         description="Number of NAT gateways to create",
         default=DEFAULT_NAT_GATEWAY_COUNT,
     )
+    bastion_host: Optional[bool] = pydantic.Field(
+        description="""Whether to create a bastion host. It can typically 
+        be used to make administrative connections to the database if 
+        `public_db_subnet` is False""",
+        default=True,
+    )
     bastion_host_create_elastic_ip: Optional[bool] = pydantic.Field(
         description="Whether to create an elastic IP for the bastion host",
         default=False,
@@ -93,3 +100,21 @@ class Config(BaseSettings):
 
     def build_service_name(self, service_id: str) -> str:
         return f"{self.project_id}-{self.stage}-{service_id}"
+
+
+def build_app_config() -> AppConfig:
+    """Builds the AppConfig object from config.yaml file if exists,
+    otherwise use defaults"""
+    try:
+        with open("config.yaml") as f:
+            print("Loading config from config.yaml")
+            app_config = yaml.safe_load(f)
+            app_config = (
+                {} if app_config is None else app_config
+            )  # if config is empty, set it to an empty dict
+            app_config = AppConfig(**app_config)
+    except FileNotFoundError:
+        # if no config at the expected path, using defaults
+        app_config = AppConfig()
+
+    return app_config
