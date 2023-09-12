@@ -8,8 +8,8 @@ from eoapi_cdk import (
     PgStacApiLambda,
     PgStacDatabase,
     StacIngestor,
+    TiPgApiLambda,
     TitilerPgstacApiLambda,
-    TiPgApiLambda
 )
 
 
@@ -83,14 +83,11 @@ class pgStacInfraStack(Stack):
             ),
             buckets=titiler_buckets,
         )
-        
+
         TiPgApiLambda(
             self,
             "tipg-api",
-            api_env={
-                "NAME": tipg_api_lambda_name,
-                "description": f"{stage} tipg API"
-            },
+            api_env={"NAME": tipg_api_lambda_name, "description": f"{stage} tipg API"},
             vpc=vpc,
             db=pgstac_db.db,
             db_secret=pgstac_db.pgstac_secret,
@@ -98,7 +95,7 @@ class pgStacInfraStack(Stack):
                 subnet_type=aws_ec2.SubnetType.PUBLIC
                 if public_db_subnet
                 else aws_ec2.SubnetType.PRIVATE_WITH_EGRESS
-            )
+            ),
         )
 
         BastionHost(
