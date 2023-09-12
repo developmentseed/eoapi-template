@@ -107,6 +107,13 @@ class AppConfig(BaseSettings):
         Must provide `acm_certificate_arn`""",
         default=None,
     )
+    stac_browser_version: Optional[str] = pydantic.Field(
+        description="""Version of the Radiant Earth STAC browser to deploy.
+        If none provided, no STAC browser will be deployed.
+        If provided, `stac_api_custom_domain` must be provided
+        as it will be used as a backend.""",
+        default=None,
+    )
 
     @pydantic.field_validator("tags")
     def default_tags(cls, v, info: FieldValidationInfo):
@@ -120,6 +127,16 @@ class AppConfig(BaseSettings):
                              are to be located in the private subnet of the VPC, NAT
                              gateways are needed to allow egress from the services
                              and therefore `nat_gateway_count` has to be > 0."""
+            )
+        else:
+            return v
+
+    @pydantic.field_validator("stac_browser_version")
+    def validate_stac_browser_version(cls, v, info: FieldValidationInfo):
+        if v is not None and info.data["stac_api_custom_domain"] is None:
+            raise ValueError(
+                """If a STAC browser version is provided, 
+                a custom domain must be provided for the STAC API"""
             )
         else:
             return v

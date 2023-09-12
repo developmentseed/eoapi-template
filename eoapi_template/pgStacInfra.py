@@ -8,6 +8,7 @@ from eoapi_cdk import (
     BastionHost,
     PgStacApiLambda,
     PgStacDatabase,
+    StacBrowser,
     StacIngestor,
     TiPgApiLambda,
     TitilerPgstacApiLambda,
@@ -191,6 +192,15 @@ class pgStacInfraStack(Stack):
             if app_config.stac_ingestor_api_custom_domain
             else None,
         )
+
+        if app_config.stac_browser_version:
+            StacBrowser(
+                self,
+                "stac-browser",
+                github_repo_tag=app_config.stac_browser_version,
+                stac_catalog_url=f"https://{app_config.stac_api_custom_domain}",
+                website_index_document="index.html",
+            )
 
         # we can only do that if the role is created here.
         # If injecting a role, that role's trust relationship
