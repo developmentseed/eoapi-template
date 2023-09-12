@@ -81,6 +81,32 @@ class AppConfig(BaseSettings):
         buckets to grant access to the titiler API""",
         default=[],
     )
+    acm_certificate_arn: Optional[str] = pydantic.Field(
+        description="""ARN of ACM certificate to use for 
+        custom domain names. If provided,
+        CDNs are created for all the APIs""",
+        default=None,
+    )
+    stac_api_custom_domain: Optional[str] = pydantic.Field(
+        description="""Custom domain name for the STAC API. 
+        Must provide `acm_certificate_arn`""",
+        default=None,
+    )
+    titiler_pgstac_api_custom_domain: Optional[str] = pydantic.Field(
+        description="""Custom domain name for the titiler pgstac API. 
+        Must provide `acm_certificate_arn`""",
+        default=None,
+    )
+    stac_ingestor_api_custom_domain: Optional[str] = pydantic.Field(
+        description="""Custom domain name for the STAC ingestor API.
+        Must provide `acm_certificate_arn`""",
+        default=None,
+    )
+    tipg_api_custom_domain: Optional[str] = pydantic.Field(
+        description="""Custom domain name for the tipg API. 
+        Must provide `acm_certificate_arn`""",
+        default=None,
+    )
 
     @pydantic.field_validator("tags")
     def default_tags(cls, v, info: FieldValidationInfo):
@@ -94,6 +120,23 @@ class AppConfig(BaseSettings):
                              are to be located in the private subnet of the VPC, NAT
                              gateways are needed to allow egress from the services
                              and therefore `nat_gateway_count` has to be > 0."""
+            )
+        else:
+            return v
+
+    @pydantic.field_validator("acm_certificate_arn")
+    def validate_acm_certificate_arn(cls, v, info: FieldValidationInfo):
+        if v is None and any(
+            [
+                info.data["stac_api_custom_domain"],
+                info.data["titiler_pgstac_api_custom_domain"],
+                info.data["stac_ingestor_api_custom_domain"],
+                info.data["tipg_api_custom_domain"],
+            ]
+        ):
+            raise ValueError(
+                """If any custom domain is provided, 
+                an ACM certificate ARN must be provided"""
             )
         else:
             return v

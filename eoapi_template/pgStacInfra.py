@@ -1,6 +1,8 @@
 import boto3
 import yaml
-from aws_cdk import Stack, aws_ec2, aws_iam, aws_rds
+from aws_cdk import Stack, aws_certificatemanager, aws_ec2, aws_iam, aws_rds
+from aws_cdk.aws_apigateway import DomainNameOptions
+from aws_cdk.aws_apigatewayv2_alpha import DomainName
 from constructs import Construct
 from eoapi_cdk import (
     BastionHost,
@@ -60,6 +62,18 @@ class pgStacInfraStack(Stack):
                 if app_config.public_db_subnet
                 else aws_ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
+            stac_api_domain_name=DomainName(
+                self,
+                "stac-api-domain-name",
+                domain_name=app_config.stac_api_custom_domain,
+                certificate=aws_certificatemanager.Certificate.from_certificate_arn(
+                    self,
+                    "stac-api-cdn-certificate",
+                    certificate_arn=app_config.acm_certificate_arn,
+                ),
+            )
+            if app_config.stac_api_custom_domain
+            else None,
         )
 
         TitilerPgstacApiLambda(
@@ -78,6 +92,18 @@ class pgStacInfraStack(Stack):
                 else aws_ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             buckets=app_config.titiler_buckets,
+            titiler_pgstac_api_domain_name=DomainName(
+                self,
+                "titiler-pgstac-api-domain-name",
+                domain_name=app_config.titiler_pgstac_api_custom_domain,
+                certificate=aws_certificatemanager.Certificate.from_certificate_arn(
+                    self,
+                    "titiler-pgstac-api-cdn-certificate",
+                    certificate_arn=app_config.acm_certificate_arn,
+                ),
+            )
+            if app_config.titiler_pgstac_api_custom_domain
+            else None,
         )
 
         TiPgApiLambda(
@@ -95,6 +121,18 @@ class pgStacInfraStack(Stack):
                 if app_config.public_db_subnet
                 else aws_ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
+            tipg_api_domain_name=DomainName(
+                self,
+                "tipg-api-domain-name",
+                domain_name=app_config.tipg_api_custom_domain,
+                certificate=aws_certificatemanager.Certificate.from_certificate_arn(
+                    self,
+                    "tipg-api-cdn-certificate",
+                    certificate_arn=app_config.acm_certificate_arn,
+                ),
+            )
+            if app_config.tipg_api_custom_domain
+            else None,
         )
 
         if app_config.bastion_host:
@@ -142,6 +180,16 @@ class pgStacInfraStack(Stack):
                 subnet_type=aws_ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             api_env=stac_ingestor_env,
+            ingestor_domain_name_options=DomainNameOptions(
+                domain_name=app_config.stac_ingestor_api_custom_domain,
+                certificate=aws_certificatemanager.Certificate.from_certificate_arn(
+                    self,
+                    "stac-ingestor-api-cdn-certificate",
+                    certificate_arn=app_config.acm_certificate_arn,
+                ),
+            )
+            if app_config.stac_ingestor_api_custom_domain
+            else None,
         )
 
         # we can only do that if the role is created here.
