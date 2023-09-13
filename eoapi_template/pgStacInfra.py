@@ -1,6 +1,14 @@
 import boto3
 import yaml
-from aws_cdk import Stack, aws_certificatemanager, aws_ec2, aws_iam, aws_rds
+from aws_cdk import (
+    RemovalPolicy,
+    Stack,
+    aws_certificatemanager,
+    aws_ec2,
+    aws_iam,
+    aws_rds,
+    aws_s3,
+)
 from aws_cdk.aws_apigateway import DomainNameOptions
 from aws_cdk.aws_apigatewayv2_alpha import DomainName
 from constructs import Construct
@@ -194,12 +202,29 @@ class pgStacInfraStack(Stack):
         )
 
         if app_config.stac_browser_version:
+            stac_browser_bucket = aws_s3.Bucket(
+                self,
+                "stac-browser-bucket",
+                bucket_name=app_config.build_service_name("stac-browser"),
+                removal_policy=RemovalPolicy.DESTROY,
+                auto_delete_objects=True,
+                website_index_document="index.html",
+                public_read_access=True,
+                block_public_access=aws_s3.BlockPublicAccess(
+                    block_public_acls=False,
+                    block_public_policy=False,
+                    ignore_public_acls=False,
+                    restrict_public_buckets=False,
+                ),
+                object_ownership=aws_s3.ObjectOwnership.OBJECT_WRITER,
+            )
             StacBrowser(
                 self,
                 "stac-browser",
                 github_repo_tag=app_config.stac_browser_version,
                 stac_catalog_url=f"https://{app_config.stac_api_custom_domain}",
                 website_index_document="index.html",
+                bucket_arn=stac_browser_bucket.bucket_arn,
             )
 
         # we can only do that if the role is created here.
