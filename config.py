@@ -18,6 +18,7 @@ class AppConfig(BaseSettings):
     stage: Optional[str] = pydantic.Field(
         description="Stage of deployment", default=DEFAULT_STAGE
     )
+    # because of its validator, `tags` should always come after `project_id` and `stage`
     tags: Optional[Dict[str, str]] = pydantic.Field(
         description="""Tags to apply to resources. If none provided, 
         will default to the defaults defined in `default_tags`.
@@ -51,7 +52,7 @@ class AppConfig(BaseSettings):
     public_db_subnet: Optional[bool] = pydantic.Field(
         description="Whether to put the database in a public subnet", default=False
     )
-    nat_gateway_count: Optional[int] = pydantic.Field(
+    nat_gateway_count: Optional[int] = pydantic.Field[int](
         description="Number of NAT gateways to create",
         default=DEFAULT_NAT_GATEWAY_COUNT,
     )
@@ -119,9 +120,11 @@ class AppConfig(BaseSettings):
     def default_tags(cls, v, info: FieldValidationInfo):
         return v or {"project_id": info.data["project_id"], "stage": info.data["stage"]}
 
-    @pydantic.field_validator("nat_gateway_count")
-    def validate_nat_gateway_count(cls, v, info: FieldValidationInfo):
-        if not info.data["public_db_subnet"] and v <= 0:
+    @pydantic.model_validator(mode="after")
+    def validate_nat_gateway_count(self) -> "AppConfig":
+        if not self.public_db_subnet and (
+            self.nat_gateway_count is not None and self.nat_gateway_count <= 0
+        ):
             raise ValueError(
                 """if the database and its associated services instances
                              are to be located in the private subnet of the VPC, NAT
@@ -129,26 +132,29 @@ class AppConfig(BaseSettings):
                              and therefore `nat_gateway_count` has to be > 0."""
             )
         else:
-            return v
+            return self
 
-    @pydantic.field_validator("stac_browser_version")
-    def validate_stac_browser_version(cls, v, info: FieldValidationInfo):
-        if v is not None and info.data["stac_api_custom_domain"] is None:
+    @pydantic.model_validator(mode="after")
+    def validate_stac_browser_version(self) -> "AppConfig":
+        if (
+            self.stac_browser_version is not None
+            and self.stac_api_custom_domain is None
+        ):
             raise ValueError(
                 """If a STAC browser version is provided, 
                 a custom domain must be provided for the STAC API"""
             )
         else:
-            return v
+            return self
 
-    @pydantic.field_validator("acm_certificate_arn")
-    def validate_acm_certificate_arn(cls, v, info: FieldValidationInfo):
-        if v is None and any(
+    @pydantic.model_validator(mode="after")
+    def validate_acm_certificate_arn(self) -> "AppConfig":
+        if self.acm_certificate_arn is None and any(
             [
-                info.data["stac_api_custom_domain"],
-                info.data["titiler_pgstac_api_custom_domain"],
-                info.data["stac_ingestor_api_custom_domain"],
-                info.data["tipg_api_custom_domain"],
+                self.stac_api_custom_domain,
+                self.titiler_pgstac_api_custom_domain,
+                self.stac_ingestor_api_custom_domain,
+                self.tipg_api_custom_domain,
             ]
         ):
             raise ValueError(
@@ -156,7 +162,7 @@ class AppConfig(BaseSettings):
                 an ACM certificate ARN must be provided"""
             )
         else:
-            return v
+            return self
 
     def build_service_name(self, service_id: str) -> str:
         return f"{self.project_id}-{self.stage}-{service_id}"
