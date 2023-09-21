@@ -6,18 +6,12 @@ from aws_cdk import aws_ec2
 from pydantic_core.core_schema import FieldValidationInfo
 from pydantic_settings import BaseSettings
 
-DEFAULT_PROJECT_ID = "eoapi-template-demo"
-DEFAULT_STAGE = "test"
-DEFAULT_NAT_GATEWAY_COUNT = 1
-
 
 class AppConfig(BaseSettings):
     project_id: str = pydantic.Field(
-        description="Project ID", default=DEFAULT_PROJECT_ID
+        description="Project ID", default="eoapi-template-demo"
     )
-    stage: str = pydantic.Field(
-        description="Stage of deployment", default=DEFAULT_STAGE
-    )
+    stage: str = pydantic.Field(description="Stage of deployment", default="test")
     # because of its validator, `tags` should always come after `project_id` and `stage`
     tags: Dict[str, str] | None = pydantic.Field(
         description="""Tags to apply to resources. If none provided, 
@@ -50,29 +44,32 @@ class AppConfig(BaseSettings):
         description="Allocated storage for the database", default=5
     )
     public_db_subnet: bool = pydantic.Field(
-        description="Whether to put the database in a public subnet", default=False
+        description="Whether to put the database in a public subnet", default=True
     )
     nat_gateway_count: int = pydantic.Field(
         description="Number of NAT gateways to create",
-        default=DEFAULT_NAT_GATEWAY_COUNT,
+        default=0,
     )
     bastion_host: bool = pydantic.Field(
         description="""Whether to create a bastion host. It can typically 
         be used to make administrative connections to the database if 
         `public_db_subnet` is False""",
-        default=True,
+        default=False,
     )
     bastion_host_create_elastic_ip: bool = pydantic.Field(
-        description="Whether to create an elastic IP for the bastion host",
+        description="""Whether to create an elastic IP for the bastion host.
+        Ignored if `bastion_host` equals `False`""",
         default=False,
     )
     bastion_host_allow_ip_list: List[str] = pydantic.Field(
         description="""YAML file containing list of IP addresses to 
-        allow SSH access to the bastion host""",
+        allow SSH access to the bastion host. Ignored if `bastion_host`
+        equals `False`.""",
         default=[],
     )
     bastion_host_user_data: Union[Dict[str, Any], aws_ec2.UserData] = pydantic.Field(
-        description="Path to file containing user data for the bastion host",
+        description="""Path to file containing user data for the bastion host.
+        Ignored if `bastion_host` equals `False`.""",
         default=aws_ec2.UserData.for_linux(),
     )
     titiler_buckets: List[str] = pydantic.Field(
