@@ -1,0 +1,53 @@
+name: tests
+
+permissions:
+    id-token: write  # required for requesting the JWT
+    contents: read  # required for actions/checkout
+
+on:
+   # add your triggered configuration here. This one is for a manual run. 
+   workflow_dispatch:
+
+jobs:
+    python-job:
+        name: "PyTest tests"
+        runs-on: ubuntu-latest
+        strategy:
+          matrix:
+            include:
+              - environment: test
+              - environment: dev
+        environment: ${{ matrix.environment }}
+
+        steps:
+          - name: Checkout repository
+            uses: actions/checkout@v4
+            with:
+                repository: 'developmentseed/eoapi-cdk'
+
+          - name: Setup Python
+            uses: actions/setup-python@v3
+            with:
+                python-version: '3.11.4'
+
+          - name: Assume Github OIDC role
+            uses: aws-actions/configure-aws-credentials@v2
+            with:
+                aws-region: us-west-2
+                role-to-assume: ${{ vars.EOAPI_TEST_ROLE }}
+                role-session-name: maap-eoapi-tests-${{ matrix.environment }}
+
+          - name: Install dependencies
+            working-directory: 'integration_tests/tests'
+            run: |
+                python -m pip install --upgrade pip && pip install -e .
+
+          - name: Run pytest
+            env:
+                INGESTOR_DOMAIN_NAME: ${{ vars.INGESTOR_DOMAIN_NAME }}
+                STAC_API_CUSTOM_DOMAIN_NAME: ${{ vars.STAC_API_CUSTOM_DOMAIN_NAME }}
+                TITILER_PGSTAC_API_CUSTOM_DOMAIN_NAME: ${{ vars.TITILER_PGSTAC_API_CUSTOM_DOMAIN_NAME }}
+                # if auth was set up in the deployment
+                SECRET_ID: ${{ vars.SECRET_ID }}
+            run: |
+                pytest eoapi_tests

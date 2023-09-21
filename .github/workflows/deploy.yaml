@@ -1,0 +1,49 @@
+name: deploy
+
+permissions:
+  id-token: write  # required for requesting the JWT
+  contents: read  # required for actions/checkout
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_environment:
+        description: 'environment'
+        required: true
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    environment: "${{ github.event.inputs.deployment_environment }}"
+    
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up node
+      uses: actions/setup-node@v2
+      with:
+        node-version: 18
+
+    - name: Assume Github OIDC role
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-region: us-west-2
+        role-to-assume: ${{ vars.DEPLOY_ROLE }}
+        role-session-name: eoapi-template-${{ github.event.inputs.deployment_environment }}-deploy
+
+    - name: Install deployment dependencies
+      run: | 
+        npm install
+
+    # if you want a custom configuration, you need to have a config.yaml committed to the repository. 
+    - name: Run CDK deploy
+      env:
+        STAGE: "${{ github.event.inputs.deployment_environment }}"
+        GIT_REPOSITORY: ${{ github.repository}}
+        COMMIT_SHA: ${{ github.sha }}
+        AUTHOR: ${{ github.actor }}
+      run: |
+        npm install -g aws-cdk
+        cdk deploy --all --require-approval never
