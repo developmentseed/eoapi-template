@@ -44,3 +44,7 @@ Then, deploy
 ```
 npx cdk deploy --all --require-approval never
 ```
+
+## Example github actions
+
+Example github actions for deployment and tests (that rely on [eoapi-cdk](https://github.com/developmentseed/eoapi-cdk) tests) can be found in the `.github/workflows` folder. For these to work, you will need to have github environment variables set up (see the workflow YAML files for more details).
