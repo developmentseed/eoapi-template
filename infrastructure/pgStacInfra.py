@@ -11,6 +11,7 @@ from aws_cdk import (
 )
 from aws_cdk.aws_apigateway import DomainNameOptions
 from aws_cdk.aws_apigatewayv2_alpha import DomainName
+from config import AppConfig
 from constructs import Construct
 from eoapi_cdk import (
     BastionHost,
@@ -21,8 +22,6 @@ from eoapi_cdk import (
     TiPgApiLambda,
     TitilerPgstacApiLambda,
 )
-
-from config import AppConfig
 
 
 class pgStacInfraStack(Stack):

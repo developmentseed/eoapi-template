@@ -1,5 +1,4 @@
 from aws_cdk import App
-
 from config import build_app_config
 from pgStacInfra import pgStacInfraStack
 from vpc import VpcStack

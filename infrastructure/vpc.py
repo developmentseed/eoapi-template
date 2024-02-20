@@ -1,7 +1,6 @@
 from aws_cdk import Stack, aws_ec2
-from constructs import Construct
-
 from config import AppConfig
+from constructs import Construct
 
 
 class VpcStack(Stack):
