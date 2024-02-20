@@ -12,7 +12,6 @@ services:
     depends_on:
       - stac
       - raster
-      - vector
       - database
 
   stac:
