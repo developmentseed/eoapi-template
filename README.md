@@ -4,15 +4,15 @@ Demonstration application showing the use and configuration options of the [eoap
 
 ## Requirements
 
-- python
+- python >=3.9
 - docker
-- node
-- AWS credentials environment variables configured to point to an account. 
+- node >=14
+- AWS credentials environment variables configured to point to an account.
 - **Optional** a `config.yaml` file to override the default deployment settings defined in `config.py`.
 
 ## Installation
 
-Install python dependencies with 
+Install python dependencies with
 
 ```
 python -m venv .venv
@@ -20,7 +20,7 @@ source .venv/bin/activate
 python -m pip install -r requirements.txt
 ```
 
-And node dependencies with 
+And node dependencies with
 
 ```
 npm install
@@ -33,7 +33,7 @@ npx cdk --version
 ```
 ## Deployment
 
-First, synthesize the app 
+First, synthesize the app
 
 ```
 npx cdk synth --all
