@@ -1,32 +1,31 @@
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 import pydantic
 import yaml
 from aws_cdk import aws_ec2
+from pydantic import Field
 from pydantic_core.core_schema import FieldValidationInfo
 from pydantic_settings import BaseSettings
 
 
 class AppConfig(BaseSettings):
-    project_id: str = pydantic.Field(
-        description="Project ID", default="eoapi-template-demo"
-    )
-    stage: str = pydantic.Field(description="Stage of deployment", default="test")
+    project_id: str = Field(description="Project ID", default="eoapi-template-demo")
+    stage: str = Field(description="Stage of deployment", default="test")
     # because of its validator, `tags` should always come after `project_id` and `stage`
-    tags: Dict[str, str] | None = pydantic.Field(
-        description="""Tags to apply to resources. If none provided, 
+    tags: Optional[Dict[str, str]] = Field(
+        description="""Tags to apply to resources. If none provided,
         will default to the defaults defined in `default_tags`.
-        Note that if tags are passed to the CDK CLI via `--tags`, 
+        Note that if tags are passed to the CDK CLI via `--tags`,
         they will override any tags defined here.""",
         default=None,
     )
-    auth_provider_jwks_url: str | None = pydantic.Field(
+    auth_provider_jwks_url: Optional[str] = Field(
         description="""Auth Provider JSON Web Key Set URL for
-        ingestion authentication. If not provided, 
+        ingestion authentication. If not provided,
         no authentication will be required.""",
         default=None,
     )
-    data_access_role_arn: str | None = pydantic.Field(
+    data_access_role_arn: Optional[str] = Field(
         description="""Role ARN for data access, that will be
         used by the STAC ingestor for validation of assets
         located in S3 and for the tiler application to access
@@ -37,73 +36,73 @@ class AppConfig(BaseSettings):
         assume it. See https://github.com/developmentseed/eoapi-cdk""",
         default=None,
     )
-    db_instance_type: str = pydantic.Field(
+    db_instance_type: str = Field(
         description="Database instance type", default="t3.micro"
     )
-    db_allocated_storage: int = pydantic.Field(
+    db_allocated_storage: int = Field(
         description="Allocated storage for the database", default=5
     )
-    public_db_subnet: bool = pydantic.Field(
+    public_db_subnet: bool = Field(
         description="Whether to put the database in a public subnet", default=True
     )
-    nat_gateway_count: int = pydantic.Field(
+    nat_gateway_count: int = Field(
         description="Number of NAT gateways to create",
         default=0,
     )
-    bastion_host: bool = pydantic.Field(
-        description="""Whether to create a bastion host. It can typically 
-        be used to make administrative connections to the database if 
+    bastion_host: bool = Field(
+        description="""Whether to create a bastion host. It can typically
+        be used to make administrative connections to the database if
         `public_db_subnet` is False""",
         default=False,
     )
-    bastion_host_create_elastic_ip: bool = pydantic.Field(
+    bastion_host_create_elastic_ip: bool = Field(
         description="""Whether to create an elastic IP for the bastion host.
         Ignored if `bastion_host` equals `False`""",
         default=False,
     )
-    bastion_host_allow_ip_list: List[str] = pydantic.Field(
-        description="""YAML file containing list of IP addresses to 
+    bastion_host_allow_ip_list: List[str] = Field(
+        description="""YAML file containing list of IP addresses to
         allow SSH access to the bastion host. Ignored if `bastion_host`
         equals `False`.""",
         default=[],
     )
-    bastion_host_user_data: Union[Dict[str, Any], aws_ec2.UserData] = pydantic.Field(
+    bastion_host_user_data: Union[Dict[str, Any], aws_ec2.UserData] = Field(
         description="""Path to file containing user data for the bastion host.
         Ignored if `bastion_host` equals `False`.""",
         default=aws_ec2.UserData.for_linux(),
     )
-    titiler_buckets: List[str] = pydantic.Field(
+    titiler_buckets: List[str] = Field(
         description="""Path to YAML file containing list of
         buckets to grant access to the titiler API""",
         default=[],
     )
-    acm_certificate_arn: str | None = pydantic.Field(
-        description="""ARN of ACM certificate to use for 
+    acm_certificate_arn: Optional[str] = Field(
+        description="""ARN of ACM certificate to use for
         custom domain names. If provided,
         CDNs are created for all the APIs""",
         default=None,
     )
-    stac_api_custom_domain: str | None = pydantic.Field(
-        description="""Custom domain name for the STAC API. 
+    stac_api_custom_domain: Optional[str] = Field(
+        description="""Custom domain name for the STAC API.
         Must provide `acm_certificate_arn`""",
         default=None,
     )
-    titiler_pgstac_api_custom_domain: str | None = pydantic.Field(
-        description="""Custom domain name for the titiler pgstac API. 
+    titiler_pgstac_api_custom_domain: Optional[str] = Field(
+        description="""Custom domain name for the titiler pgstac API.
         Must provide `acm_certificate_arn`""",
         default=None,
     )
-    stac_ingestor_api_custom_domain: str | None = pydantic.Field(
+    stac_ingestor_api_custom_domain: Optional[str] = Field(
         description="""Custom domain name for the STAC ingestor API.
         Must provide `acm_certificate_arn`""",
         default=None,
     )
-    tipg_api_custom_domain: str | None = pydantic.Field(
-        description="""Custom domain name for the tipg API. 
+    tipg_api_custom_domain: Optional[str] = Field(
+        description="""Custom domain name for the tipg API.
         Must provide `acm_certificate_arn`""",
         default=None,
     )
-    stac_browser_version: str | None = pydantic.Field(
+    stac_browser_version: Optional[str] = Field(
         description="""Version of the Radiant Earth STAC browser to deploy.
         If none provided, no STAC browser will be deployed.
         If provided, `stac_api_custom_domain` must be provided
@@ -136,7 +135,7 @@ class AppConfig(BaseSettings):
             and self.stac_api_custom_domain is None
         ):
             raise ValueError(
-                """If a STAC browser version is provided, 
+                """If a STAC browser version is provided,
                 a custom domain must be provided for the STAC API"""
             )
         else:
@@ -153,7 +152,7 @@ class AppConfig(BaseSettings):
             ]
         ):
             raise ValueError(
-                """If any custom domain is provided, 
+                """If any custom domain is provided,
                 an ACM certificate ARN must be provided"""
             )
         else:
