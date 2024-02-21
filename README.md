@@ -1,6 +1,6 @@
 # eoapi-template
 
-Demonstration application showing the use and configuration options of the [eoapi-cdk constructs](https://github.com/developmentseed/eoapi-cdk) on AWS.
+Template repository to deploy [eoapi](https://eoapi.dev) on AWS using the [eoapi-cdk constructs](https://github.com/developmentseed/eoapi-cdk) or locally with Docker.
 
 ## Requirements
 
@@ -44,3 +44,21 @@ Then, deploy
 ```
 npx cdk deploy --all --require-approval never
 ```
+
+## Docker
+
+Before deploying the application on the cloud, you can start by exploring it with a local *Docker* deployment
+
+```
+docker compose up
+```
+
+Once the applications are *up*, you'll need to add STAC **Collections** and **Items** to the PgSTAC database. If you don't have, you can use the follow the [MAXAR open data demo](https://github.com/vincentsarago/MAXAR_opendata_to_pgstac) (or get inspired by the other [demos](https://github.com/developmentseed/eoAPI/tree/main/demo)).
+
+Then you can start exploring your dataset with:
+
+  - the STAC Metadata service [http://localhost:8081](http://localhost:8081)
+  - the Raster service [http://localhost:8082](http://localhost:8082)
+  - the browser UI [http://localhost:8085](http://localhost:8085)
+
+If you've added a vector dataset to the `public` schema in the Postgres database, they will be available through the **Vector** service at [http://localhost:8083](http://localhost:8083).

@@ -162,5 +162,7 @@ cython_debug/
 # CDK
 cdk.out
 
-# node 
+# node
 node_modules/
+
+.pgdata
