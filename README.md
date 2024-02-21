@@ -1,6 +1,6 @@
 # eoapi-template
 
-Template repository to deploy [eoapi](https://eoapi.dev) application using [eoapi-cdk constructs](https://github.com/developmentseed/eoapi-cdk) on AWS.
+Template repository to deploy [eoapi](https://eoapi.dev) on AWS using the [eoapi-cdk constructs](https://github.com/developmentseed/eoapi-cdk) or locally with Docker.
 
 ## Requirements
 
