@@ -47,7 +47,7 @@ npx cdk deploy --all --require-approval never
 
 ## Docker
 
-Before deploying the application, you can start exploring the different services using *Docker*
+Before deploying the application on the cloud, you can start by exploring it with a local *Docker* deployment
 
 ```
 docker compose up
