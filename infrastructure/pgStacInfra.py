@@ -47,9 +47,11 @@ class pgStacInfraStack(Stack):
                 version=aws_rds.PostgresEngineVersion.VER_14
             ),
             vpc_subnets=aws_ec2.SubnetSelection(
-                subnet_type=aws_ec2.SubnetType.PUBLIC
-                if app_config.public_db_subnet
-                else aws_ec2.SubnetType.PRIVATE_ISOLATED
+                subnet_type=(
+                    aws_ec2.SubnetType.PUBLIC
+                    if app_config.public_db_subnet
+                    else aws_ec2.SubnetType.PRIVATE_ISOLATED
+                )
             ),
             allocated_storage=app_config.db_allocated_storage,
             instance_type=aws_ec2.InstanceType(app_config.db_instance_type),
@@ -66,22 +68,26 @@ class pgStacInfraStack(Stack):
             db=pgstac_db.db,
             db_secret=pgstac_db.pgstac_secret,
             subnet_selection=aws_ec2.SubnetSelection(
-                subnet_type=aws_ec2.SubnetType.PUBLIC
-                if app_config.public_db_subnet
-                else aws_ec2.SubnetType.PRIVATE_WITH_EGRESS
+                subnet_type=(
+                    aws_ec2.SubnetType.PUBLIC
+                    if app_config.public_db_subnet
+                    else aws_ec2.SubnetType.PRIVATE_WITH_EGRESS
+                )
             ),
-            stac_api_domain_name=DomainName(
-                self,
-                "stac-api-domain-name",
-                domain_name=app_config.stac_api_custom_domain,
-                certificate=aws_certificatemanager.Certificate.from_certificate_arn(
+            stac_api_domain_name=(
+                DomainName(
                     self,
-                    "stac-api-cdn-certificate",
-                    certificate_arn=app_config.acm_certificate_arn,
-                ),
-            )
-            if app_config.stac_api_custom_domain
-            else None,
+                    "stac-api-domain-name",
+                    domain_name=app_config.stac_api_custom_domain,
+                    certificate=aws_certificatemanager.Certificate.from_certificate_arn(
+                        self,
+                        "stac-api-cdn-certificate",
+                        certificate_arn=app_config.acm_certificate_arn,
+                    ),
+                )
+                if app_config.stac_api_custom_domain
+                else None
+            ),
         )
 
         TitilerPgstacApiLambda(
@@ -95,23 +101,27 @@ class pgStacInfraStack(Stack):
             db=pgstac_db.db,
             db_secret=pgstac_db.pgstac_secret,
             subnet_selection=aws_ec2.SubnetSelection(
-                subnet_type=aws_ec2.SubnetType.PUBLIC
-                if app_config.public_db_subnet
-                else aws_ec2.SubnetType.PRIVATE_WITH_EGRESS
+                subnet_type=(
+                    aws_ec2.SubnetType.PUBLIC
+                    if app_config.public_db_subnet
+                    else aws_ec2.SubnetType.PRIVATE_WITH_EGRESS
+                )
             ),
             buckets=app_config.titiler_buckets,
-            titiler_pgstac_api_domain_name=DomainName(
-                self,
-                "titiler-pgstac-api-domain-name",
-                domain_name=app_config.titiler_pgstac_api_custom_domain,
-                certificate=aws_certificatemanager.Certificate.from_certificate_arn(
+            titiler_pgstac_api_domain_name=(
+                DomainName(
                     self,
-                    "titiler-pgstac-api-cdn-certificate",
-                    certificate_arn=app_config.acm_certificate_arn,
-                ),
-            )
-            if app_config.titiler_pgstac_api_custom_domain
-            else None,
+                    "titiler-pgstac-api-domain-name",
+                    domain_name=app_config.titiler_pgstac_api_custom_domain,
+                    certificate=aws_certificatemanager.Certificate.from_certificate_arn(
+                        self,
+                        "titiler-pgstac-api-cdn-certificate",
+                        certificate_arn=app_config.acm_certificate_arn,
+                    ),
+                )
+                if app_config.titiler_pgstac_api_custom_domain
+                else None
+            ),
         )
 
         TiPgApiLambda(
@@ -125,22 +135,26 @@ class pgStacInfraStack(Stack):
             db=pgstac_db.db,
             db_secret=pgstac_db.pgstac_secret,
             subnet_selection=aws_ec2.SubnetSelection(
-                subnet_type=aws_ec2.SubnetType.PUBLIC
-                if app_config.public_db_subnet
-                else aws_ec2.SubnetType.PRIVATE_WITH_EGRESS
+                subnet_type=(
+                    aws_ec2.SubnetType.PUBLIC
+                    if app_config.public_db_subnet
+                    else aws_ec2.SubnetType.PRIVATE_WITH_EGRESS
+                )
             ),
-            tipg_api_domain_name=DomainName(
-                self,
-                "tipg-api-domain-name",
-                domain_name=app_config.tipg_api_custom_domain,
-                certificate=aws_certificatemanager.Certificate.from_certificate_arn(
+            tipg_api_domain_name=(
+                DomainName(
                     self,
-                    "tipg-api-cdn-certificate",
-                    certificate_arn=app_config.acm_certificate_arn,
-                ),
-            )
-            if app_config.tipg_api_custom_domain
-            else None,
+                    "tipg-api-domain-name",
+                    domain_name=app_config.tipg_api_custom_domain,
+                    certificate=aws_certificatemanager.Certificate.from_certificate_arn(
+                        self,
+                        "tipg-api-cdn-certificate",
+                        certificate_arn=app_config.acm_certificate_arn,
+                    ),
+                )
+                if app_config.tipg_api_custom_domain
+                else None
+            ),
         )
 
         if app_config.bastion_host:
@@ -150,11 +164,13 @@ class pgStacInfraStack(Stack):
                 vpc=vpc,
                 db=pgstac_db.db,
                 ipv4_allowlist=app_config.bastion_host_allow_ip_list,
-                user_data=aws_ec2.UserData.custom(
-                    yaml.dump(app_config.bastion_host_user_data)
-                )
-                if app_config.bastion_host_user_data is not None
-                else aws_ec2.UserData.for_linux(),
+                user_data=(
+                    aws_ec2.UserData.custom(
+                        yaml.dump(app_config.bastion_host_user_data)
+                    )
+                    if app_config.bastion_host_user_data is not None
+                    else aws_ec2.UserData.for_linux()
+                ),
                 create_elastic_ip=app_config.bastion_host_create_elastic_ip,
             )
 
@@ -188,16 +204,18 @@ class pgStacInfraStack(Stack):
                 subnet_type=aws_ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             api_env=stac_ingestor_env,
-            ingestor_domain_name_options=DomainNameOptions(
-                domain_name=app_config.stac_ingestor_api_custom_domain,
-                certificate=aws_certificatemanager.Certificate.from_certificate_arn(
-                    self,
-                    "stac-ingestor-api-cdn-certificate",
-                    certificate_arn=app_config.acm_certificate_arn,
-                ),
-            )
-            if app_config.stac_ingestor_api_custom_domain
-            else None,
+            ingestor_domain_name_options=(
+                DomainNameOptions(
+                    domain_name=app_config.stac_ingestor_api_custom_domain,
+                    certificate=aws_certificatemanager.Certificate.from_certificate_arn(
+                        self,
+                        "stac-ingestor-api-cdn-certificate",
+                        certificate_arn=app_config.acm_certificate_arn,
+                    ),
+                )
+                if app_config.stac_ingestor_api_custom_domain
+                else None
+            ),
         )
 
         if app_config.stac_browser_version:
