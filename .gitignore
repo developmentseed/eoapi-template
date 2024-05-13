@@ -166,3 +166,5 @@ cdk.out
 node_modules/
 
 .pgdata
+
+.ruff_cache/

@@ -9,7 +9,7 @@ class VpcStack(Stack):
             scope,
             id=app_config.build_service_name("pgSTAC-vpc"),
             tags=app_config.tags,
-            **kwargs
+            **kwargs,
         )
 
         self.vpc = aws_ec2.Vpc(
