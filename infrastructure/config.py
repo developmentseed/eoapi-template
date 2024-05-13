@@ -1,9 +1,13 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Type, Union
 
-import yaml
 from aws_cdk import aws_ec2
 from pydantic import Field, ValidationInfo, field_validator, model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import (
+    BaseSettings,
+    PydanticBaseSettingsSource,
+    SettingsConfigDict,
+    YamlConfigSettingsSource,
+)
 from typing_extensions import Self
 
 
@@ -65,7 +69,7 @@ class AppConfig(BaseSettings):
         equals `False`.""",
         default=[],
     )
-    bastion_host_user_data: Union[Dict[str, Any], aws_ec2.UserData] = Field(
+    bastion_host_user_data: Union[str, aws_ec2.UserData] = Field(
         description="""Path to file containing user data for the bastion host.
         Ignored if `bastion_host` equals `False`.""",
         default=aws_ec2.UserData.for_linux(),
@@ -109,7 +113,7 @@ class AppConfig(BaseSettings):
         default=None,
     )
 
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=".env", yaml_file="config.yaml")
 
     @field_validator("tags")
     def default_tags(cls, v, info: ValidationInfo):
@@ -154,20 +158,19 @@ class AppConfig(BaseSettings):
     def build_service_name(self, service_id: str) -> str:
         return f"{self.project_id}-{self.stage}-{service_id}"
 
-
-def build_app_config() -> AppConfig:
-    """Builds the AppConfig object from config.yaml file if exists,
-    otherwise use defaults"""
-    try:
-        with open("config.yaml") as f:
-            print("Loading config from config.yaml")
-            app_config = yaml.safe_load(f)
-            app_config = (
-                {} if app_config is None else app_config
-            )  # if config is empty, set it to an empty dict
-            app_config = AppConfig(**app_config)
-    except FileNotFoundError:
-        # if no config at the expected path, using defaults
-        app_config = AppConfig()
-
-    return app_config
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: Type[BaseSettings],
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
+    ) -> Tuple[PydanticBaseSettingsSource, ...]:
+        return (
+            init_settings,
+            env_settings,
+            dotenv_settings,
+            file_secret_settings,
+            YamlConfigSettingsSource(settings_cls),
+        )

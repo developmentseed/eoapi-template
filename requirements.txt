@@ -1,6 +1,5 @@
 eoapi-cdk==7.1.0
 pydantic==2.7
-pydantic-settings==2.2.1
+pydantic-settings["yaml"]==2.2.1
 boto3==1.24.15
-pyyaml==6.0
 typing-extensions
