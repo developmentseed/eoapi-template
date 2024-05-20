@@ -113,7 +113,9 @@ class AppConfig(BaseSettings):
         default=None,
     )
 
-    model_config = SettingsConfigDict(env_file=".env", yaml_file="config.yaml")
+    model_config = SettingsConfigDict(
+        env_file=".env", yaml_file="config.yaml", extra="allow"
+    )
 
     @field_validator("tags")
     def default_tags(cls, v, info: ValidationInfo):
