@@ -12,7 +12,7 @@ from aws_cdk import (
 )
 from aws_cdk.aws_apigateway import DomainNameOptions
 from aws_cdk.aws_apigatewayv2_alpha import DomainName
-from config import AppConfig, build_app_config
+from config import AppConfig
 from constructs import Construct
 from eoapi_cdk import (
     BastionHost,
@@ -378,7 +378,7 @@ class eoAPIStack(Stack):
 
 app = App()
 
-app_config = build_app_config()
+app_config = AppConfig()
 
 vpc_stack = VpcStack(
     scope=app,
