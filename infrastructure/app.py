@@ -252,7 +252,7 @@ class eoAPIStack(Stack):
             stage=app_config.stage,
             data_access_role=data_access_role,
             stac_db_secret=pgstac_db.pgstac_secret,
-            stac_db_security_group=pgstac_db.db.connections.security_groups[0],
+            stac_db_security_group=pgstac_db.security_group,
             # If the db is not in the public subnet then we need to put
             # the lambda within the VPC
             vpc=vpc if not app_config.public_db_subnet else None,
