@@ -99,6 +99,7 @@ class eoAPIStack(Stack):
         pgstac_db = PgStacDatabase(
             self,
             "pgstac-db",
+            add_pgbouncer=True,
             vpc=vpc,
             engine=aws_rds.DatabaseInstanceEngine.postgres(
                 version=aws_rds.PostgresEngineVersion.VER_14
@@ -114,7 +115,11 @@ class eoAPIStack(Stack):
             instance_type=aws_ec2.InstanceType(app_config.db_instance_type),
             removal_policy=RemovalPolicy.DESTROY,
         )
-        pgstac_db.db.connections.allow_default_port_from_any_ipv4()
+
+        assert pgstac_db.security_group
+        pgstac_db.security_group.add_ingress_rule(
+            aws_ec2.Peer.any_ipv4(), aws_ec2.Port.tcp(5432)
+        )
 
         #######################################################################
         # STAC API service
@@ -125,7 +130,7 @@ class eoAPIStack(Stack):
                 "NAME": app_config.build_service_name("stac"),
                 "description": f"{app_config.stage} STAC API",
             },
-            db=pgstac_db.db,
+            db=pgstac_db.connection_target,
             db_secret=pgstac_db.pgstac_secret,
             # If the db is not in the public subnet then we need to put
             # the lambda within the VPC
@@ -160,7 +165,7 @@ class eoAPIStack(Stack):
                 "NAME": app_config.build_service_name("raster"),
                 "description": f"{app_config.stage} Raster API",
             },
-            db=pgstac_db.db,
+            db=pgstac_db.connection_target,
             db_secret=pgstac_db.pgstac_secret,
             # If the db is not in the public subnet then we need to put
             # the lambda within the VPC
@@ -192,7 +197,7 @@ class eoAPIStack(Stack):
         TiPgApiLambda(
             self,
             "vector-api",
-            db=pgstac_db.db,
+            db=pgstac_db.connection_target,
             db_secret=pgstac_db.pgstac_secret,
             api_env={
                 "NAME": app_config.build_service_name("vector"),
