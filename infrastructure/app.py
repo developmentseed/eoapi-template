@@ -102,7 +102,7 @@ class eoAPIStack(Stack):
             add_pgbouncer=True,
             vpc=vpc,
             engine=aws_rds.DatabaseInstanceEngine.postgres(
-                version=aws_rds.PostgresEngineVersion.VER_14
+                version=aws_rds.PostgresEngineVersion.VER_16
             ),
             vpc_subnets=aws_ec2.SubnetSelection(
                 subnet_type=(
