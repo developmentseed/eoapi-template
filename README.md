@@ -12,12 +12,18 @@ Template repository to deploy [eoapi](https://eoapi.dev) on AWS using the [eoapi
 
 ## Installation
 
-Install python dependencies with
+Install python dependencies with either `pip` or `uv`.
 
 ```
+# use pip
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
+```
+
+# use uv
+uv sync
+source .venv/bin/activate
 ```
 
 And node dependencies with
