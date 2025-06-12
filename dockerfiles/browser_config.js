@@ -1,5 +1,5 @@
 module.exports = {
-    catalogUrl: "http://0.0.0.0:8081",
+  catalogUrl: "http://localhost:8081",
     catalogTitle: "eoAPI STAC Browser",
     allowExternalAccess: true, // Must be true if catalogUrl is not given
     allowedDomains: [],
@@ -12,7 +12,7 @@ module.exports = {
         "es",
         "en",
         "fr",
-        "it",
+    "http://localhost:8082/external/tiles/WebMercatorQuad/{z}/{x}/{y}@2x?url=" +
         "ro"
     ],
     apiCatalogPriority: null,
