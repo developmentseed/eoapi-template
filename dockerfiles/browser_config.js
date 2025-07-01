@@ -12,13 +12,13 @@ module.exports = {
         "es",
         "en",
         "fr",
-    "http://localhost:8082/external/tiles/WebMercatorQuad/{z}/{x}/{y}@2x?url=" +
+        "it",
         "ro"
     ],
     apiCatalogPriority: null,
-    useTileLayerAsFallback: true,
+    useTileLayerAsFallback: false,
     displayGeoTiffByDefault: false,
-    buildTileUrlTemplate: ({href, asset}) => "http://0.0.0.0:8082/cog/tiles/{z}/{x}/{y}@2x?url=" + encodeURIComponent(asset.href.startsWith("/vsi") ? asset.href : href),
+    buildTileUrlTemplate: ({href, asset}) => "http://localhost:8082/external/tiles/WebMercatorQuad/{z}/{x}/{y}@2x?url=" + encodeURIComponent(asset.href.startsWith("/vsi") ? asset.href : href),
     stacProxyUrl: null,
     pathPrefix: "/",
     historyMode: "history",
