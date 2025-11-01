@@ -1,0 +1,20 @@
+[project]
+name = "eoapi-template"
+version = "0.1.0"
+description = "template infrastructure-as-code for deploying eoAPI"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "boto3>=1.40.64",
+    "eoapi-cdk>=10.3.0,<11",
+    "pydantic>=2.12.3",
+    "pydantic-settings[yaml]>=2.11.0",
+    "typing-extensions>=4.15.0",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.18.2",
+    "pre-commit>=4.3.0",
+    "ruff>=0.14.3",
+]

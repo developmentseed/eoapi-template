@@ -11,7 +11,7 @@ from aws_cdk import (
     aws_s3,
 )
 from aws_cdk.aws_apigateway import DomainNameOptions
-from aws_cdk.aws_apigatewayv2_alpha import DomainName
+from aws_cdk.aws_apigatewayv2 import DomainName
 from config import AppConfig
 from constructs import Construct
 from eoapi_cdk import (
@@ -102,7 +102,7 @@ class eoAPIStack(Stack):
             add_pgbouncer=True,
             vpc=vpc,
             engine=aws_rds.DatabaseInstanceEngine.postgres(
-                version=aws_rds.PostgresEngineVersion.VER_16
+                version=aws_rds.PostgresEngineVersion.VER_17
             ),
             vpc_subnets=aws_ec2.SubnetSelection(
                 subnet_type=(
@@ -130,6 +130,9 @@ class eoAPIStack(Stack):
                 "NAME": app_config.build_service_name("stac"),
                 "description": f"{app_config.stage} STAC API",
             },
+            # SnapStart: https://docs.aws.amazon.com/lambda/latest/dg/snapstart.html
+            # enable this to reduce API cold start times (comes with a fixed cost increase)
+            enable_snap_start=False,
             db=pgstac_db.connection_target,
             db_secret=pgstac_db.pgstac_secret,
             # If the db is not in the public subnet then we need to put
@@ -165,6 +168,9 @@ class eoAPIStack(Stack):
                 "NAME": app_config.build_service_name("raster"),
                 "description": f"{app_config.stage} Raster API",
             },
+            # SnapStart: https://docs.aws.amazon.com/lambda/latest/dg/snapstart.html
+            # enable this to reduce API cold start times (comes with a fixed cost increase)
+            enable_snap_start=False,
             db=pgstac_db.connection_target,
             db_secret=pgstac_db.pgstac_secret,
             # If the db is not in the public subnet then we need to put
@@ -203,6 +209,9 @@ class eoAPIStack(Stack):
                 "NAME": app_config.build_service_name("vector"),
                 "description": f"{app_config.stage} tipg API",
             },
+            # SnapStart: https://docs.aws.amazon.com/lambda/latest/dg/snapstart.html
+            # enable this to reduce API cold start times (comes with a fixed cost increase)
+            enable_snap_start=False,
             # If the db is not in the public subnet then we need to put
             # the lambda within the VPC
             vpc=vpc if not app_config.public_db_subnet else None,
@@ -355,13 +364,16 @@ class eoAPIStack(Stack):
         self,
         role_to_assume: aws_iam.Role,
         principal_pattern: str,
-        account_id: str = boto3.client("sts").get_caller_identity().get("Account"),
+        account_id: str | None = None,
     ) -> aws_iam.Role:
         """
         Grants assume role permissions to the role of the given
         account with the given name pattern. Default account
         is the current account.
         """
+
+        if not account_id:
+            account_id = boto3.client("sts").get_caller_identity().get("Account")
 
         role_to_assume.assume_role_policy.add_statements(
             aws_iam.PolicyStatement(

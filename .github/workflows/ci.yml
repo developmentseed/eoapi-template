@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Install Python dependencies
+        run: uv sync
+
+      - name: Install Node dependencies
+        run: npm install
+
+      - name: Run pre-commit
+        run: uv run pre-commit run --all-files
+
+      - name: Synthesize CDK stack
+        env:
+          AWS_ACCESS_KEY_ID: AKIAIOSFODNN7EXAMPLE
+          AWS_SECRET_ACCESS_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+          AWS_REGION: us-east-1
+          AWS_DEFAULT_REGION: us-east-1
+          DATA_ACCESS_ROLE_ARN: arn:aws:iam::123456789012:role/DummyDataAccessRole
+
+
+        run: uv run npx cdk synth --all
