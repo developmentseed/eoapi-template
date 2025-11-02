@@ -66,6 +66,36 @@ Then, deploy
 uv run npx cdk deploy --all --require-approval never
 ```
 
+## GitHub Actions
+
+The repository includes a CI workflow (`.github/workflows/ci.yml`) that runs on every push to `main` and on all pull requests. The workflow:
+
+1. Sets up the build environment with Node.js 22 and Python (via `uv`)
+2. Installs all project dependencies (both Python and Node)
+3. Runs pre-commit hooks to check code quality and formatting
+4. Synthesizes the CDK stack to validate the infrastructure-as-code configuration
+
+This ensures that all code changes pass quality checks and that the CDK stack can be successfully synthesized before merging.
+
+### Automated Deployment
+
+The workflow also includes an example `deploy` job that demonstrates how to automatically deploy your eoAPI stack to AWS using GitHub Actions. This job showcases:
+
+- **AWS OIDC authentication** - Secure, keyless authentication using GitHub's OIDC provider
+- **GitHub Environments** - Pulling deployment configuration from environment-specific variables
+- **Protection rules** - Leveraging GitHub's environment protection features (approvals, branch restrictions)
+
+> [!NOTE]
+> This deployment job is a basic starting point and can be triggered manually via `workflow_dispatch`. You should tailor it to match your specific deployment strategy, such as:
+>
+> - Adding multiple environments (staging, production, etc.)
+> - Implementing deployment approval workflows
+> - Adding post-deployment validation or smoke tests
+> - Customizing environment variables for different stages
+> - Integrating with monitoring or notification systems
+
+To set up AWS OIDC authentication for GitHub Actions, refer to the [AWS documentation on configuring OIDC with GitHub](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc.html) and the [GitHub documentation for Configuring OpenID Connect in AWS](https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws).
+
 ## Docker
 
 Before deploying the application on the cloud, you can start by exploring it with a local *Docker* deployment
