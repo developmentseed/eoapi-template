@@ -1,5 +1,5 @@
-project_id: "eoapi-yo"
-stage: "production"
+project_id: "eoapi"
+stage: "test"
 tags: {owner: user_a}
 
 # Ingest Options
@@ -12,7 +12,7 @@ db_allocated_storage: 5
 public_db_subnet: False
 
 # VPC Options
-nat_gateway_count: 4
+nat_gateway_count: 0
 
 # Bastion Host Options
 bastion_host: True

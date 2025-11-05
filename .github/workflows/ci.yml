@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+# Required for AWS OIDC authentication
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Install Python dependencies
+        run: uv sync
+
+      - name: Install Node dependencies
+        run: npm install
+
+      - name: Run pre-commit
+        run: uv run pre-commit run --all-files
+
+      - name: Synthesize CDK stack
+        env:
+          AWS_ACCESS_KEY_ID: AKIAIOSFODNN7EXAMPLE
+          AWS_SECRET_ACCESS_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+          AWS_REGION: us-east-1
+          AWS_DEFAULT_REGION: us-east-1
+          DATA_ACCESS_ROLE_ARN: arn:aws:iam::123456789012:role/DummyDataAccessRole
+
+        run: uv run npx cdk synth --all
+
+  # Example deployment job - demonstrates how to deploy using GitHub environments
+  # To use:
+  # 1. Create a GitHub environment (Settings > Environments)
+  # 2. Configure environment variables in that environment
+  # 3. Set up AWS OIDC provider and IAM role with trust relationship to GitHub
+  # 4. Customize as needed
+  deploy:
+    if: github.event_name == 'workflow_dispatch'
+    needs: test
+    runs-on: ubuntu-latest
+
+    # Reference your GitHub environment here
+    # This pulls in environment-specific variables and protection rules
+    environment:
+      name: production  # Change to your environment name
+      url: ${{ steps.deploy.outputs.url }}  # Optional: link to deployed application
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Install Python dependencies
+        run: uv sync
+
+      - name: Install Node dependencies
+        run: npm install
+
+      - name: Configure AWS credentials from OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          # This role ARN should be stored as an environment variable in GitHub
+          # The role must have a trust policy allowing GitHub OIDC authentication
+          role-to-assume: ${{ vars.AWS_DEPLOYMENT_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          # Optional: role session name for CloudTrail auditing
+          role-session-name: GitHubActions-${{ github.run_id }}
+
+      - name: Deploy CDK stack
+        id: deploy
+        env:
+          # Pull additional configuration from GitHub environment variables
+          # These should be set in Settings > Environments > [environment-name] > Variables
+          DATA_ACCESS_ROLE_ARN: ${{ vars.DATA_ACCESS_ROLE_ARN }}
+          # Add any other environment-specific variables here
+          # PROJECT_ID: ${{ vars.PROJECT_ID }}
+          # STAGE: ${{ vars.STAGE }}
+        run: |
+          uv run npx cdk deploy --all --require-approval never
+
+          # Optional: capture and output deployment URLs
+          # echo "url=https://your-api-url.com" >> $GITHUB_OUTPUT
