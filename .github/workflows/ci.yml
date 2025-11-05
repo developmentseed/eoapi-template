@@ -83,7 +83,7 @@ jobs:
         run: npm install
 
       - name: Configure AWS credentials from OIDC
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           # This role ARN should be stored as an environment variable in GitHub
           # The role must have a trust policy allowing GitHub OIDC authentication
