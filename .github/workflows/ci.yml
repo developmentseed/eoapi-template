@@ -48,12 +48,11 @@ jobs:
         run: uv run npx cdk synth --all
 
   # Example deployment job - demonstrates how to deploy using GitHub environments
-  # This job is commented out and serves as a template for users
   # To use:
   # 1. Create a GitHub environment (Settings > Environments)
   # 2. Configure environment variables in that environment
   # 3. Set up AWS OIDC provider and IAM role with trust relationship to GitHub
-  # 4. Uncomment this job and customize as needed
+  # 4. Customize as needed
   deploy:
     if: github.event_name == 'workflow_dispatch'
     needs: test
@@ -72,7 +71,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '22'
+          node-version-file: '.nvmrc'
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
