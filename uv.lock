@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.10"
 
 [[package]]
@@ -156,7 +156,7 @@ wheels = [
 
 [[package]]
 name = "eoapi-cdk"
-version = "10.3.0"
+version = "11.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aws-cdk-lib" },
@@ -165,9 +165,9 @@ dependencies = [
     { name = "publication" },
     { name = "typeguard" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/39/cb/a9b83c9871392b93d39b21c306e9dfa27a98a95ac929ac90feb5a183d90f/eoapi_cdk-10.3.0.tar.gz", hash = "sha256:1505b5fcc4c465d5b4e542faf335499a8d4407d27b074f95b4146bcb020a934a", size = 258033, upload-time = "2025-09-30T16:28:33.063Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/34/9e/2409e31e0f14531a05e72cc8c90dca40869685f6f9be7e6aeea0e15d9a88/eoapi_cdk-11.6.0.tar.gz", hash = "sha256:20b043d51fa904010cd93fb1520b2b9ceb93cb13eb1dfee621928dc6aca13bee", size = 631355, upload-time = "2026-05-28T16:03:33.8Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/55/c0/e5aa84595d7f16cb7bc0870648dcf7ac6af75cebaca51bab0a56dfd0288f/eoapi_cdk-10.3.0-py3-none-any.whl", hash = "sha256:2f382a45aaa1f13a6e1f519bad80e4201fcb2aa81ff3cc6dcd1a1f0cd314d451", size = 256393, upload-time = "2025-09-30T16:28:31.486Z" },
+    { url = "https://files.pythonhosted.org/packages/37/80/56e179a27e609fc7dba8d19c2964de1ec91d185d8770457868ec7927f421/eoapi_cdk-11.6.0-py3-none-any.whl", hash = "sha256:8186ab34487be5149bc82d17935fdde3ba5697caca1203e50a1e3bc2b2128ff9", size = 629803, upload-time = "2026-05-28T16:03:32.134Z" },
 ]
 
 [[package]]
@@ -192,7 +192,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "boto3", specifier = ">=1.40.64" },
-    { name = "eoapi-cdk", specifier = ">=10.3.0,<11" },
+    { name = "eoapi-cdk", specifier = ">=11.6.0,<12" },
     { name = "pydantic", specifier = ">=2.12.3" },
     { name = "pydantic-settings", extras = ["yaml"], specifier = ">=2.11.0" },
     { name = "typing-extensions", specifier = ">=4.15.0" },
@@ -236,15 +236,6 @@ wheels = [
 ]
 
 [[package]]
-name = "importlib-resources"
-version = "6.5.2"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/cf/8c/f834fbf984f691b4f7ff60f50b514cc3de5cc08abfc3295564dd89c5e2e7/importlib_resources-6.5.2.tar.gz", hash = "sha256:185f87adef5bcc288449d98fb4fba07cea78bc036455dd44c5fc4a2fe78fed2c", size = 44693, upload-time = "2025-01-03T18:51:56.698Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/a4/ed/1f1afb2e9e7f38a545d628f864d562a5ae64fe6f7a10e28ffb9b185b4e89/importlib_resources-6.5.2-py3-none-any.whl", hash = "sha256:789cfdc3ed28c78b67a06acb8126751ced69a3d5f79c095a98298cd8a760ccec", size = 37461, upload-time = "2025-01-03T18:51:54.306Z" },
-]
-
-[[package]]
 name = "jmespath"
 version = "1.0.1"
 source = { registry = "https://pypi.org/simple" }
@@ -255,20 +246,19 @@ wheels = [
 
 [[package]]
 name = "jsii"
-version = "1.118.0"
+version = "1.137.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "attrs" },
     { name = "cattrs" },
-    { name = "importlib-resources" },
     { name = "publication" },
     { name = "python-dateutil" },
     { name = "typeguard" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/64/3f/91efc4c4d4b8e03aac7a21f6779592a74a67cddb4594737f6a9e859c842e/jsii-1.118.0.tar.gz", hash = "sha256:711131f84a9e968e12b8a09449c734907ca53faa51bf5b85685976dff9faf554", size = 625560, upload-time = "2025-10-29T09:56:05.26Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/db/00/fb7b05656d945a64bbc3cfa2027abe3df51666527d150a442ceb86d0d01c/jsii-1.137.0.tar.gz", hash = "sha256:6ac273e47b2066d29ef2f6c6a4131abddf5cbf9d772626d8b63040a9622302a6", size = 528873, upload-time = "2026-06-22T16:14:43.046Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/98/24/222440ffcca93995650e7e08215df4d3313435455288e77e0d503713b86a/jsii-1.118.0-py3-none-any.whl", hash = "sha256:2f772d423ccf107193ba39a7ade7e43e6b5a063cad734009d1b4b0f80c5e7456", size = 601789, upload-time = "2025-10-29T09:56:03.984Z" },
+    { url = "https://files.pythonhosted.org/packages/1b/bb/2f7c032b07243eab1b0df4325fa9ed7a09ee8b1cf742a1a34145a8803024/jsii-1.137.0-py3-none-any.whl", hash = "sha256:e6054da2b760c560b1f145195b71e85e9d87fb67f92270db27331bddb7eaf697", size = 501116, upload-time = "2026-06-22T16:14:41.435Z" },
 ]
 
 [[package]]
